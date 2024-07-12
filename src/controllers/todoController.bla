@@ -1,0 +1,34 @@
+import request from 'supertest'
+import { NextFunction } from 'express'
+
+import app from '../app'
+import { ERROR_CODES } from '../errors/errorCodes'
+
+jest.mock('../middleware/index', () => ({
+  authorization: (request: Request, response: Response, next: NextFunction) => next(),
+  asyncHandler: (request: Request, response: Response, next: NextFunction) => next(),
+}))
+
+describe('TodoController.createTodo', () => {
+  it('should return 400 if title or status is missing', async () => {
+    const response = await request(app).post('/todos').send({ title: '', status: '' })
+    expect(response.statusCode).toBe(400)
+    expect(response.body).toBe(ERROR_CODES.TODOS_CONTROLLER.CREATE_TODO.MISSING_TITLE_OR_STATUS)
+  })
+
+  it('should create a todo and return 201 with the todo object if title and status are provided', async () => {
+    const todoData = { title: 'Test Todo', status: 'pending' }
+    const response = await request(app).post('/todos').send(todoData)
+    expect(response.statusCode).toBe(201)
+    expect(response.body).toHaveProperty('clientId')
+    expect(response.body).toHaveProperty('title', todoData.title)
+    expect(response.body).toHaveProperty('status', todoData.status)
+  })
+
+  it('should correctly handle clientId from the request', async () => {
+    const todoData = { title: 'Test Todo', status: 'pending', clientId: '12345' }
+    const response = await request(app).post('/todos').send(todoData)
+    expect(response.statusCode).toBe(201)
+    expect(response.body).toHaveProperty('clientId', todoData.clientId)
+  })
+})

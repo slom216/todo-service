@@ -1,0 +1,17 @@
+### Login Request
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "client1",
+  "password": "password1"
+}
+
+### Register Request
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "client1",
+  "password": "password1"
+}

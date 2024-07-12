@@ -1,0 +1,27 @@
+### Get All To-Dos
+GET http://localhost:3000/todos
+Authorization: Bearer <token>
+
+### Create a New To-Do
+POST http://localhost:3000/todos
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "title": "New To-Do",
+  "status": "not completed"
+}
+
+### Update a To-Do
+PUT http://localhost:3000/todos/<id>
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "title": "Updated To-Do",
+  "status": "completed"
+}
+
+### Delete a To-Do
+DELETE http://localhost:3000/todos/<id>
+Authorization: Bearer <token>
