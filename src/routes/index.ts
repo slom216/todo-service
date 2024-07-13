@@ -1,32 +1,16 @@
 import { Router } from 'express'
 
-import { asyncHandler, authorization } from '../middleware'
-import TodoController from '../controllers/todoController'
-import AuthController from '../controllers/authController'
+import { authorization, authRateLimiter } from '../middleware'
+import authRouter from './authRoutes'
+import todoRouter from './todoRoutes'
 
 // eslint-disable-next-line new-cap
 const router = Router()
 
-const publicRoutes = () => {
-  router.post('/auth/login', asyncHandler(AuthController.login))
+router.use('/auth', authRateLimiter, authRouter)
 
-  router.post('/auth/register', asyncHandler(AuthController.register))
-}
+router.use(authorization)
 
-const authenticatedRoutes = () => {
-  router.use(authorization)
-
-  router.post('/todos', asyncHandler(TodoController.createTodo))
-
-  router.get('/todos', asyncHandler(TodoController.getTodos))
-
-  router.put('/todos/:id', asyncHandler(TodoController.updateTodoById))
-
-  router.delete('/todos/:id', asyncHandler(TodoController.deleteTodoById))
-}
-
-publicRoutes()
-
-authenticatedRoutes()
+router.use('/todos', todoRouter)
 
 export default router

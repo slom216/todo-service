@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from 'express'
+import { JwtPayload } from 'jsonwebtoken'
+import rateLimit from 'express-rate-limit'
+
 import { ERROR_CODES } from '../errors/errorCodes'
 import { AuthService } from '../services/authService'
-import { JwtPayload } from 'jsonwebtoken'
 
 export const authorization = (request: Request, response: Response, next: NextFunction) => {
   const authHeader = request.headers?.authorization
@@ -33,3 +35,17 @@ export const errorMiddleware = (error: unknown, _: Request, response: Response, 
 
   return response.status(500).send('Internal server error')
 }
+
+export const generalRateLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 100,
+  message: 'Too many requests from this IP, please try again later',
+  headers: true,
+})
+
+export const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: 'Too many login attempts from this IP, please try again later',
+  headers: true,
+})
