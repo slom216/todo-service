@@ -3,3 +3,6 @@
 
 .env
 todos.db
+/certs/cert.pem
+/certs/csr.pem
+/certs/key.pem

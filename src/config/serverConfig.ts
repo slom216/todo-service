@@ -9,6 +9,7 @@ const config = {
   jwtExpiryTime: process.env.JWT_EXPIRY_TIME ?? '',
   jwtSecret: process.env.JWT_SECRET ?? '',
   port: process.env.PORT ?? '',
+  httpPort: process.env.HTTP_PORT ?? '',
 }
 
 export default config
