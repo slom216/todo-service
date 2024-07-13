@@ -10,8 +10,9 @@ export const authorization = (request: Request, response: Response, next: NextFu
     return response.status(401).send(ERROR_CODES.AUTHORIZATION_MIDDLEWARE.AUTHORIZATION.MISSING_AUTHORIZATION_HEADER)
   }
 
-  const token = authHeader.split(' ')[1] // Bearer <token>
   try {
+    const [_, token] = authHeader.split(' ') // Bearer <token>
+
     const decoded = AuthService.verifyToken(token) as JwtPayload
     request.clientId = decoded.clientId
     request.user = decoded
@@ -22,10 +23,12 @@ export const authorization = (request: Request, response: Response, next: NextFu
   }
 }
 
-export const asyncHandler = (fn: Function) => (request: Request, response: Response, next: NextFunction) =>
-  Promise.resolve(fn(request, response, next)).catch(next)
+export const asyncHandler =
+  (fn: (request: Request, response: Response, next: NextFunction) => Promise<unknown>) =>
+  (request: Request, response: Response, next: NextFunction) =>
+    Promise.resolve(fn(request, response, next)).catch(next)
 
-export const errorMiddleware = (error: any, _: Request, response: Response, next: NextFunction) => {
+export const errorMiddleware = (error: unknown, _: Request, response: Response, __: NextFunction) => {
   console.error(error)
 
   return response.status(500).send('Internal server error')

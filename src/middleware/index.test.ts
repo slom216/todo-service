@@ -1,4 +1,4 @@
-import { NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 
 import { ERROR_CODES } from '../errors/errorCodes'
 import { asyncHandler, authorization, errorMiddleware } from './index'
@@ -6,14 +6,27 @@ import { AuthService } from '../services/authService'
 
 jest.mock('../services/authService')
 
+interface TestRequest extends Partial<Request> {
+  headers: Record<string, string | undefined>
+  get: jest.MockedFunction<(name: 'set-cookie') => string[] | undefined> &
+    jest.MockedFunction<(name: string) => string | undefined>
+}
+
+interface TestResponse extends Partial<Response> {
+  status: jest.MockedFunction<(statusCode: number) => Response>
+  send: jest.MockedFunction<(body?: string) => Response>
+  json: jest.MockedFunction<(body?: string) => Response>
+}
+
 describe('authorization middleware', () => {
-  let request: any
-  let response: any
+  let request: TestRequest
+  let response: TestResponse
   let next: NextFunction
 
   beforeEach(() => {
     request = {
       headers: {},
+      get: jest.fn(),
     }
     response = {
       status: jest.fn().mockReturnThis(),
@@ -24,7 +37,7 @@ describe('authorization middleware', () => {
   })
 
   it('should return 401 if authorization header is missing', () => {
-    authorization(request, response, next)
+    authorization(request as Request, response as Response, next)
     expect(response.status).toHaveBeenCalledWith(401)
     expect(response.send).toHaveBeenCalledWith(
       ERROR_CODES.AUTHORIZATION_MIDDLEWARE.AUTHORIZATION.MISSING_AUTHORIZATION_HEADER
@@ -37,7 +50,7 @@ describe('authorization middleware', () => {
       throw new Error('Invalid token')
     })
 
-    authorization(request, response, next)
+    authorization(request as Request, response as Response, next)
     expect(response.status).toHaveBeenCalledWith(401)
     expect(response.json).toHaveBeenCalledWith(
       ERROR_CODES.AUTHORIZATION_MIDDLEWARE.AUTHORIZATION.INVALID_AUTHORIZATION_HEADER
@@ -49,7 +62,7 @@ describe('authorization middleware', () => {
     request.headers.authorization = 'Bearer validtoken'
     ;(AuthService.verifyToken as jest.Mock).mockReturnValue(decodedToken)
 
-    authorization(request, response, next)
+    authorization(request as Request, response as Response, next)
     expect(request.clientId).toEqual(decodedToken.clientId.toString())
     expect(request.user).toEqual(decodedToken)
     expect(next).toHaveBeenCalled()
@@ -57,16 +70,19 @@ describe('authorization middleware', () => {
 })
 
 describe('asyncHandler', () => {
-  let mockRequest: any
-  let mockResponse: any
-  let nextFunction: NextFunction = jest.fn()
+  let request: TestRequest
+  let response: TestResponse
+  const nextFunction: NextFunction = jest.fn()
 
   beforeEach(() => {
-    mockRequest = {}
-    mockResponse = {
-      json: jest.fn(),
+    request = {
+      headers: {},
+      get: jest.fn(),
+    }
+    response = {
       status: jest.fn().mockReturnThis(),
-      send: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+      json: jest.fn(),
     }
   })
 
@@ -74,9 +90,9 @@ describe('asyncHandler', () => {
     const sampleAsyncFunction = jest.fn().mockResolvedValue('success')
     const handler = asyncHandler(sampleAsyncFunction)
 
-    await handler(mockRequest, mockResponse, nextFunction)
+    await handler(request as Request, response as Response, nextFunction)
 
-    expect(sampleAsyncFunction).toHaveBeenCalledWith(mockRequest, mockResponse, nextFunction)
+    expect(sampleAsyncFunction).toHaveBeenCalledWith(request as Request, response as Response, nextFunction)
 
     expect(nextFunction).not.toHaveBeenCalled()
   })
@@ -86,23 +102,27 @@ describe('asyncHandler', () => {
     const sampleAsyncFunction = jest.fn().mockRejectedValue(error)
     const handler = asyncHandler(sampleAsyncFunction)
 
-    await handler(mockRequest, mockResponse, nextFunction)
+    await handler(request as Request, response as Response, nextFunction)
 
     expect(nextFunction).toHaveBeenCalledWith(error)
   })
 })
 
 describe('errorMiddleware', () => {
-  let mockRequest: any
-  let mockResponse: any
-  let nextFunction: NextFunction = jest.fn()
+  let request: TestRequest
+  let response: TestResponse
+  const nextFunction: NextFunction = jest.fn()
   let consoleSpy: jest.SpyInstance
 
   beforeEach(() => {
-    mockRequest = {}
-    mockResponse = {
+    request = {
+      headers: {},
+      get: jest.fn(),
+    }
+    response = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn(),
+      json: jest.fn(),
     }
     consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
   })
@@ -114,11 +134,11 @@ describe('errorMiddleware', () => {
   it('should log the error and send a 500 status with a message', () => {
     const error = new Error('Test error')
 
-    errorMiddleware(error, mockRequest, mockResponse, nextFunction)
+    errorMiddleware(error, request as Request, response as Response, nextFunction)
 
     expect(consoleSpy).toHaveBeenCalledWith(error)
-    expect(mockResponse.status).toHaveBeenCalledWith(500)
-    expect(mockResponse.send).toHaveBeenCalledWith('Internal server error')
+    expect(response.status).toHaveBeenCalledWith(500)
+    expect(response.send).toHaveBeenCalledWith('Internal server error')
     expect(nextFunction).not.toHaveBeenCalled()
   })
 })

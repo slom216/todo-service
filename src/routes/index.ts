@@ -4,6 +4,7 @@ import { asyncHandler, authorization } from '../middleware'
 import TodoController from '../controllers/todoController'
 import AuthController from '../controllers/authController'
 
+// eslint-disable-next-line new-cap
 const router = Router()
 
 const publicRoutes = () => {

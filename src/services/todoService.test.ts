@@ -1,6 +1,7 @@
 import TodoService from './todoService'
 import db from '../database'
 import { ERROR_CODES } from '../errors/errorCodes'
+import { Database } from 'better-sqlite3'
 
 jest.mock('../database', () => ({
   prepare: jest.fn().mockReturnThis(),
@@ -9,6 +10,11 @@ jest.mock('../database', () => ({
   get: jest.fn(),
 }))
 
+interface ExtendedDatabase extends Database {
+  run: jest.Mock
+  all: jest.Mock
+}
+
 describe('TodoService', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -16,7 +22,7 @@ describe('TodoService', () => {
 
   describe('createTodo', () => {
     it('should create a todo and return the new todo object', () => {
-      const mockRun = (db as any).run as jest.Mock
+      const mockRun = (db as unknown as ExtendedDatabase).run as jest.Mock
       mockRun.mockReturnValue({ lastInsertRowid: 1, changes: 1 })
 
       const todo = TodoService.createTodo({
@@ -32,13 +38,13 @@ describe('TodoService', () => {
         status: 'pending',
       })
       expect(db.prepare).toHaveBeenCalledWith('INSERT INTO todos (client_id, title, status) VALUES (?, ?, ?)')
-      expect((db as any).run).toHaveBeenCalledWith('123', 'Test Todo', 'pending')
+      expect((db as unknown as ExtendedDatabase).run).toHaveBeenCalledWith('123', 'Test Todo', 'pending')
     })
   })
 
   describe('getTodos', () => {
     it('should return an array of todos', () => {
-      const mockAll = (db as any).all as jest.Mock
+      const mockAll = (db as unknown as ExtendedDatabase).all as jest.Mock
       mockAll.mockReturnValue([
         { id: 1, client_id: '123', title: 'Test Todo 1', status: 'pending' },
         { id: 2, client_id: '123', title: 'Test Todo 2', status: 'completed' },
@@ -51,7 +57,7 @@ describe('TodoService', () => {
         { id: 2, clientId: '123', title: 'Test Todo 2', status: 'completed' },
       ])
       expect(db.prepare).toHaveBeenCalledWith('SELECT * FROM todos WHERE client_id = ?')
-      expect((db as any).all).toHaveBeenCalledWith('123')
+      expect((db as unknown as ExtendedDatabase).all).toHaveBeenCalledWith('123')
     })
   })
 

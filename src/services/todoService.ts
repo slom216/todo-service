@@ -25,9 +25,13 @@ class TodoService {
 
   static getTodos = (clientId: string | undefined) => {
     const statement = db.prepare('SELECT * FROM todos WHERE client_id = ?')
-    return statement
-      .all(clientId)
-      .map(({ id, client_id: clientId, title, status }: any) => ({ id, clientId, title, status }))
+
+    return (statement.all(clientId) as Todo[]).map(({ id, client_id: clientId, title, status }) => ({
+      id,
+      clientId,
+      title,
+      status,
+    }))
   }
 
   static updateTodoById = ({ id, clientId, title, status }: UpdateTodoParams) => {
