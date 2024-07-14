@@ -4,9 +4,25 @@ A simple Node.js service for managing To-Dos via a REST API, written in TypeScri
 
 ## Features
 
-- **CRUD operations**: Create, Read, Update, and Delete To-Dos.
-- **JWT Authentication**: Secure access to the API using JSON Web Tokens.
-- **Persistent Storage**: Data is stored in a SQLite database and is persistent between server restarts.
+- Creating server using ExpressJs
+- Uses Typescript
+- Enables registration and login of users
+- Enables CRUD operations on Todo items
+- Using helmet to add security headers
+- Using bodyParser that parses incoming request bodies in a middleware before handlers
+- Has error middleware that will catch any uncaught error and return response with status code 500
+- Automatic creation of database if it's not existing
+- Contains both public and private API endpoints
+- Server uses HTTPS
+- Imposes input validation (using 'joi' module)
+- Authorization is done using jwtToken (using 'jsonwebtoken' module)
+- Server has rate limiter (using 'express-rate-limit' module)
+- Event driven code (using 'events' module)
+- Clustering (using 'cluster' module)
+- Unit tests (using 'jest' module)
+- ESLint is used for imposing rules
+- Supports Docker for containerization
+- Has GitHub action for automatic build and running tests to confirm that new build is stable
 
 ## Getting Started
 
@@ -51,28 +67,6 @@ npm start
 ```
 npm test
 ```
-
-## Features
-
-- Creating server using ExpressJs
-- Uses Typescript
-- Enables registration and login of users
-- Enables CRUD operations on Todo items
-- Using helmet to add security headers
-- Using bodyParser that parses incoming request bodies in a middleware before handlers
-- Has error middleware that will catch any uncaught error and return response with status code 500
-- Automatic creation of database if it's not existing
-- Contains both public and private API endpoints
-- Server uses HTTPS
-- Imposes input validation (using 'joi' module)
-- Authorization is done using jwtToken (using 'jsonwebtoken' module)
-- Server has rate limiter (using 'express-rate-limit' module)
-- Event driven code (using 'events' module)
-- Clustering
-- Unit tests
-- ESLint is used for imposing rules
-- Supports Docker for containerization
-- Has GitHub action for automatic build and running tests to confirm that new build is stable
 
 ## NOTES
 
