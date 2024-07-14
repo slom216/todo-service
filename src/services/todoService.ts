@@ -1,6 +1,8 @@
 import db from '../database'
 import { ERROR_CODES } from '../errors/errorCodes'
 import { Todo } from '../models/todo'
+import eventEmitter from '../events/eventEmitter'
+import { EVENTS } from '../events/events'
 
 type CreateTodoParams = {
   clientId: string | undefined
@@ -19,6 +21,8 @@ class TodoService {
   static createTodo = ({ clientId, title, status }: CreateTodoParams) => {
     const statement = db.prepare('INSERT INTO todos (client_id, title, status) VALUES (?, ?, ?)')
     const info = statement.run(clientId, title, status)
+
+    eventEmitter.emit(EVENTS.TODO_CREATED, { id: info.lastInsertRowid, clientId, title, status })
 
     return { id: info.lastInsertRowid, clientId, title, status }
   }
@@ -53,6 +57,8 @@ class TodoService {
       return { error: ERROR_CODES.TODO_SERVICE.UPDATE_TODO.NO_CHANGES }
     }
 
+    eventEmitter.emit(EVENTS.TODO_UPDATED, { id, clientId, title, status })
+
     return { id, clientId, title, status }
   }
 
@@ -74,6 +80,8 @@ class TodoService {
     if (info.changes === 0) {
       return { error: ERROR_CODES.TODO_SERVICE.DELETE_TODO.NO_CHANGES }
     }
+
+    eventEmitter.emit(EVENTS.TODO_DELETED, { id, clientId })
 
     return { success: true }
   }
