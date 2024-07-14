@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { JwtPayload } from 'jsonwebtoken'
 import rateLimit from 'express-rate-limit'
+import Joi from 'joi'
 
 import { ERROR_CODES } from '../errors/errorCodes'
 import { AuthService } from '../services/authService'
@@ -49,3 +50,13 @@ export const authRateLimiter = rateLimit({
   message: 'Too many login attempts from this IP, please try again later',
   headers: true,
 })
+
+export const validate = (schema: Joi.ObjectSchema) => (request: Request, response: Response, next: NextFunction) => {
+  const { error } = schema.validate(request.body)
+
+  if (error) {
+    return response.status(400).json({ error: error.details[0].message })
+  }
+
+  next()
+}

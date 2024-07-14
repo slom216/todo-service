@@ -64,6 +64,7 @@ npm test
 - Automatic creation of database if it's not existing
 - Contains both public and private API endpoints
 - Server uses HTTPS
+- Imposes input validation (using 'joi' module)
 - Authorization is done using jwtToken (using 'jsonwebtoken' module)
 - Server has rate limiter (using 'express-rate-limit' module)
 - Event driven code (using 'events' module)
