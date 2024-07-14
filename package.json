@@ -7,6 +7,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "ts-node-dev src/server.ts",
     "start:dist": "node dist/server.js",
+    "start:cluster": "ts-node-dev src/cluster.ts",
     "test": "cross-env PORT=3003 jest --config jest.config.js --detectOpenHandles",
     "test:watch": "cross-env PORT=3003 jest --config jest.config.js --detectOpenHandles --watch",
     "lint": "eslint \"src/**/*.ts\""
