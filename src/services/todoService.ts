@@ -27,8 +27,8 @@ class TodoService {
     return { id: info.lastInsertRowid, clientId, title, status }
   }
 
-  static getTodos = (clientId: string | undefined) => {
-    const statement = db.prepare('SELECT * FROM todos WHERE client_id = ?')
+  static getTodos = (clientId: string | undefined, sort: string | undefined) => {
+    const statement = db.prepare(`SELECT * FROM todos WHERE client_id = ? ORDER BY title ${sort ?? 'ASC'}`)
 
     return (statement.all(clientId) as Todo[]).map(({ id, client_id: clientId, title, status }) => ({
       id,

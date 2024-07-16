@@ -20,9 +20,12 @@ class TodoController {
   }
 
   static async getTodos(request: Request, response: Response) {
-    const { clientId } = request
+    const {
+      clientId,
+      query: { sort },
+    } = request
 
-    const todos = TodoService.getTodos(clientId)
+    const todos = TodoService.getTodos(clientId, sort?.toString())
 
     return response.json(todos)
   }
