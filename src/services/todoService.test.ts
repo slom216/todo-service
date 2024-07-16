@@ -50,13 +50,13 @@ describe('TodoService', () => {
         { id: 2, client_id: '123', title: 'Test Todo 2', status: 'completed' },
       ])
 
-      const todos = TodoService.getTodos('123')
+      const todos = TodoService.getTodos('123', 'ASC')
 
       expect(todos).toEqual([
         { id: 1, clientId: '123', title: 'Test Todo 1', status: 'pending' },
         { id: 2, clientId: '123', title: 'Test Todo 2', status: 'completed' },
       ])
-      expect(db.prepare).toHaveBeenCalledWith('SELECT * FROM todos WHERE client_id = ?')
+      expect(db.prepare).toHaveBeenCalledWith('SELECT * FROM todos WHERE client_id = ? ORDER BY title ASC')
       expect((db as unknown as ExtendedDatabase).all).toHaveBeenCalledWith('123')
     })
   })
