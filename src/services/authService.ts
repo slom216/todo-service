@@ -10,7 +10,7 @@ export class AuthService {
     const statement = db.prepare('SELECT * FROM users WHERE username = ?')
     const user = statement.get(username) as User
 
-    if (!user || !bcrypt.compareSync(password, user.password)) {
+    if (!user || !bcrypt.compareSync(password + user.salt, user.password)) {
       return { error: ERROR_CODES.AUTH_SERVICE.LOGIN.INVALID_USERNAME_OR_PASSWORD }
     }
 
@@ -29,8 +29,11 @@ export class AuthService {
       return { error: ERROR_CODES.AUTH_SERVICE.REGISTER.USERNAME_ALREADY_REGISTERED }
     }
 
-    const hashedPassword = bcrypt.hashSync(password, 8)
-    const info = db.prepare('INSERT INTO users (username, password) VALUES (?, ?)').run(username, hashedPassword)
+    const salt = bcrypt.genSaltSync(8)
+    const hashedPassword = bcrypt.hashSync(password + salt, 8)
+    const info = db
+      .prepare('INSERT INTO users (username, password, salt) VALUES (?, ?, ?)')
+      .run(username, hashedPassword, salt)
 
     return { user: { id: info.lastInsertRowid, username } }
   }

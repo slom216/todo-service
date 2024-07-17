@@ -15,7 +15,8 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     client_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    salt TEXT NOT NULL
   )
 `)
 
