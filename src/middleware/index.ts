@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { JwtPayload } from 'jsonwebtoken'
 import rateLimit from 'express-rate-limit'
 import Joi from 'joi'
+import validator from 'validator'
 
 import { ERROR_CODES } from '../errors/errorCodes'
 import { AuthService } from '../services/authService'
@@ -51,12 +52,21 @@ export const authRateLimiter = rateLimit({
   headers: true,
 })
 
-export const validate = (schema: Joi.ObjectSchema) => (request: Request, response: Response, next: NextFunction) => {
-  const { error } = schema.validate(request.body)
+export const validateAndSanitize =
+  (schema: Joi.ObjectSchema) => (request: Request, response: Response, next: NextFunction) => {
+    const { error, value } = schema.validate(request.body)
 
-  if (error) {
-    return response.status(400).json({ error: error.details[0].message })
+    if (error) {
+      return response.status(400).json({ error: error.details[0].message })
+    }
+
+    Object.keys(value).forEach((key) => {
+      if (typeof value[key] === 'string') {
+        value[key] = validator.escape(value[key])
+      }
+    })
+
+    request.body = value
+
+    next()
   }
-
-  next()
-}
