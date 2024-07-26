@@ -52,21 +52,24 @@ export const authRateLimiter = rateLimit({
   headers: true,
 })
 
-export const validateAndSanitize =
-  (schema: Joi.ObjectSchema) => (request: Request, response: Response, next: NextFunction) => {
-    const { error, value } = schema.validate(request.body)
+export const validate = (schema: Joi.ObjectSchema) => (request: Request, response: Response, next: NextFunction) => {
+  const { error, value } = schema.validate(request.body)
 
-    if (error) {
-      return response.status(400).json({ error: error.details[0].message })
-    }
+  if (error) {
+    return response.status(400).json({ error: error.details[0].message })
+  }
 
-    Object.keys(value).forEach((key) => {
-      if (typeof value[key] === 'string') {
-        value[key] = validator.escape(value[key])
+  next()
+}
+
+export const sanitizeRequestBody = (request: Request, _: Response, next: NextFunction) => {
+  if (request.body) {
+    Object.keys(request.body).forEach((key) => {
+      if (typeof request.body[key] === 'string') {
+        request.body[key] = validator.escape(request.body[key])
       }
     })
-
-    request.body = value
-
-    next()
   }
+
+  next()
+}

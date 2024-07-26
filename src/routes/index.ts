@@ -1,11 +1,13 @@
 import { Router } from 'express'
 
-import { authorization, authRateLimiter } from '../middleware'
+import { authorization, authRateLimiter, sanitizeRequestBody } from '../middleware'
 import authRouter from './authRoutes'
 import todoRouter from './todoRoutes'
 
 // eslint-disable-next-line new-cap
 const router = Router()
+
+router.use(sanitizeRequestBody)
 
 router.use('/auth', authRateLimiter, authRouter)
 
